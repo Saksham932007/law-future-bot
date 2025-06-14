@@ -24,7 +24,7 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your AI Legal Assistant powered by Gemini. I can help you with legal questions, contract analysis, and general legal guidance. How can I assist you today?",
+      content: "Hello! I'm your AI Legal Assistant. I can help you with legal questions, contract analysis, and general legal guidance. How can I assist you today?",
       role: 'assistant',
       timestamp: new Date()
     }
@@ -136,7 +136,7 @@ const Index = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  Powered by Gemini AI • Smart Legal Analysis
+                  Smart Legal Analysis
                 </motion.p>
               </div>
             </div>
@@ -147,7 +147,7 @@ const Index = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
-              <span className="text-sm text-slate-300 font-medium">Smart Legal Analysis</span>
+              <span className="text-sm text-slate-300 font-medium">AI Legal Assistant</span>
             </motion.div>
           </motion.div>
         </div>

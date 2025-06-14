@@ -72,7 +72,7 @@ const Landing = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.8, delay: 0.6 }}
                 >
-                  Powered by Gemini AI
+                  Smart Legal Assistant
                 </motion.p>
               </div>
             </motion.div>
@@ -236,7 +236,7 @@ const Landing = () => {
           >
             <div className="flex items-center justify-center space-x-4 text-slate-400 mb-4">
               <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
-              <span className="text-lg font-medium">Powered by Google Gemini AI</span>
+              <span className="text-lg font-medium">AI-Powered Legal Assistant</span>
               <Zap className="h-6 w-6 text-cyan-400 animate-pulse" />
             </div>
             <p className="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
