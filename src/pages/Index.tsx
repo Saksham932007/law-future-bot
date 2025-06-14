@@ -1,10 +1,14 @@
 
 import { useState } from 'react';
-import { Send, Scale, Sparkles, MessageCircle, User, Bot } from 'lucide-react';
+import { Send, Scale, Sparkles, MessageCircle, Zap, Shield, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Hero3D } from '@/components/Hero3D';
+import { ChatMessage } from '@/components/ChatMessage';
+import { LoadingMessage } from '@/components/LoadingMessage';
+import { motion } from 'framer-motion';
 
 interface Message {
   id: string;
@@ -102,172 +106,212 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      {/* Header */}
-      <div className="border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl shadow-lg shadow-cyan-500/25">
-                <Scale className="h-6 w-6 text-white" />
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
+      {/* Enhanced Header with 3D Background */}
+      <div className="relative border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10"></div>
+        <Hero3D />
+        <div className="relative container mx-auto px-4 py-6">
+          <motion.div 
+            className="flex items-center justify-between"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center space-x-4">
+              <motion.div 
+                className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-2xl shadow-cyan-500/25"
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Scale className="h-8 w-8 text-white" />
+              </motion.div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                <motion.h1 
+                  className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
                   LegalAI Assistant
-                </h1>
-                <p className="text-sm text-slate-400">Powered by Gemini</p>
+                </motion.h1>
+                <motion.p 
+                  className="text-sm text-slate-400 font-medium"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  Powered by Gemini AI
+                </motion.p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-5 w-5 text-cyan-400 animate-pulse" />
-              <span className="text-sm text-slate-400">AI-Powered Legal Guidance</span>
-            </div>
-          </div>
+            <motion.div 
+              className="flex items-center space-x-3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
+              <span className="text-sm text-slate-300 font-medium">AI-Powered Legal Guidance</span>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
 
-      {/* API Key Input */}
+      {/* Enhanced API Key Input */}
       {!apiKey && (
-        <div className="container mx-auto px-4 py-6">
-          <Card className="max-w-md mx-auto p-6 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-            <div className="text-center mb-4">
-              <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full w-fit mx-auto mb-3">
-                <MessageCircle className="h-6 w-6 text-white" />
+        <div className="container mx-auto px-4 py-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="max-w-md mx-auto p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50 backdrop-blur-xl shadow-2xl">
+              <div className="text-center mb-6">
+                <motion.div 
+                  className="p-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl w-fit mx-auto mb-4 shadow-xl shadow-cyan-500/25"
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <MessageCircle className="h-8 w-8 text-white" />
+                </motion.div>
+                <h3 className="text-xl font-bold text-white mb-3 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  Google AI Studio API Key Required
+                </h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Enter your Google AI Studio API key to start chatting with Gemini, your AI legal assistant.
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Google AI Studio API Key Required</h3>
-              <p className="text-sm text-slate-400">Enter your Google AI Studio API key to start chatting with Gemini, your AI legal assistant.</p>
-            </div>
-            <div className="space-y-3">
-              <Input
-                type="password"
-                placeholder="Enter your Google AI Studio API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="bg-slate-900/50 border-slate-600 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400/20"
-              />
-              <p className="text-xs text-slate-500">
-                Your API key is stored locally and never sent to our servers.
-              </p>
-            </div>
-          </Card>
+              <div className="space-y-4">
+                <Input
+                  type="password"
+                  placeholder="Enter your Google AI Studio API key"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="bg-slate-900/50 border-slate-600 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400/20 h-12 rounded-xl"
+                />
+                <p className="text-xs text-slate-500 text-center">
+                  🔒 Your API key is stored locally and never sent to our servers.
+                </p>
+              </div>
+            </Card>
+          </motion.div>
         </div>
       )}
 
-      {/* Chat Interface */}
+      {/* Enhanced Chat Interface */}
       {apiKey && (
-        <div className="container mx-auto px-4 py-6 max-w-4xl">
-          <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl overflow-hidden">
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <motion.div 
+            className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-xl rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             {/* Messages */}
-            <div className="h-96 overflow-y-auto p-6 space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-                >
-                  <div className={`flex items-start space-x-3 max-w-3xl ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                    <div className={`flex-shrink-0 p-2 rounded-full ${
-                      message.role === 'user' 
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500' 
-                        : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                    } shadow-lg`}>
-                      {message.role === 'user' ? (
-                        <User className="h-4 w-4 text-white" />
-                      ) : (
-                        <Bot className="h-4 w-4 text-white" />
-                      )}
-                    </div>
-                    <div className={`p-4 rounded-2xl ${
-                      message.role === 'user'
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25'
-                        : 'bg-slate-700/50 text-white border border-slate-600/50'
-                    } backdrop-blur-sm`}>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                      <p className="text-xs opacity-70 mt-2">
-                        {message.timestamp.toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            <div className="h-[600px] overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
+              {messages.map((message, index) => (
+                <ChatMessage 
+                  key={message.id} 
+                  message={message} 
+                  isLatest={index === messages.length - 1}
+                />
               ))}
-              {isLoading && (
-                <div className="flex justify-start animate-fade-in">
-                  <div className="flex items-start space-x-3 max-w-3xl">
-                    <div className="flex-shrink-0 p-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
-                      <Bot className="h-4 w-4 text-white" />
-                    </div>
-                    <div className="p-4 rounded-2xl bg-slate-700/50 text-white border border-slate-600/50 backdrop-blur-sm">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                        <span className="text-sm text-slate-400">Claude is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {isLoading && <LoadingMessage />}
             </div>
 
-            {/* Input Form */}
-            <div className="border-t border-slate-700/50 bg-slate-900/50 p-4">
-              <form onSubmit={handleSubmit} className="flex items-center space-x-3">
+            {/* Enhanced Input Form */}
+            <div className="border-t border-slate-700/50 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm p-6">
+              <form onSubmit={handleSubmit} className="flex items-center space-x-4">
                 <div className="flex-1 relative">
                   <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask me any legal question..."
                     disabled={isLoading}
-                    className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12"
+                    className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
                   />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <Scale className="h-4 w-4 text-slate-500" />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <Scale className="h-5 w-5 text-slate-500" />
                   </div>
                 </div>
-                <Button
-                  type="submit"
-                  disabled={isLoading || !input.trim()}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg shadow-cyan-500/25 transition-all duration-200 hover:shadow-cyan-500/40"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
+                  <Button
+                    type="submit"
+                    disabled={isLoading || !input.trim()}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 h-14 px-8 rounded-2xl font-medium"
+                  >
+                    <Send className="h-5 w-5" />
+                  </Button>
+                </motion.div>
               </form>
-              <p className="text-xs text-slate-500 mt-2 text-center">
-                Responses are for informational purposes only and not a substitute for professional legal advice.
+              <p className="text-xs text-slate-500 mt-3 text-center">
+                ⚖️ Responses are for informational purposes only and not a substitute for professional legal advice.
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
 
-      {/* Features Section */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <Card className="p-6 bg-slate-800/30 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-all duration-300 group">
-            <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg w-fit mb-4 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-all duration-300">
-              <MessageCircle className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">Legal Q&A</h3>
-            <p className="text-slate-400 text-sm">Get instant answers to your legal questions with AI-powered analysis.</p>
-          </Card>
-          
-          <Card className="p-6 bg-slate-800/30 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-all duration-300 group">
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg w-fit mb-4 group-hover:shadow-lg group-hover:shadow-purple-500/25 transition-all duration-300">
-              <Scale className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">Legal Research</h3>
-            <p className="text-slate-400 text-sm">Research legal precedents and case law with advanced AI assistance.</p>
-          </Card>
-          
-          <Card className="p-6 bg-slate-800/30 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/50 transition-all duration-300 group">
-            <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg w-fit mb-4 group-hover:shadow-lg group-hover:shadow-emerald-500/25 transition-all duration-300">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">Document Review</h3>
-            <p className="text-slate-400 text-sm">Get AI-powered insights on contracts and legal documents.</p>
-          </Card>
-        </div>
+      {/* Enhanced Features Section */}
+      <div className="container mx-auto px-4 py-16">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          {[
+            {
+              icon: MessageCircle,
+              title: "Legal Q&A",
+              description: "Get instant answers to your legal questions with AI-powered analysis and comprehensive guidance.",
+              gradient: "from-cyan-500 to-blue-600",
+              shadowColor: "shadow-cyan-500/25"
+            },
+            {
+              icon: Shield,
+              title: "Legal Research",
+              description: "Research legal precedents and case law with advanced AI assistance and detailed analysis.",
+              gradient: "from-purple-500 to-pink-600",
+              shadowColor: "shadow-purple-500/25"
+            },
+            {
+              icon: Brain,
+              title: "Document Review",
+              description: "Get AI-powered insights on contracts and legal documents with thorough analysis.",
+              gradient: "from-emerald-500 to-teal-600",
+              shadowColor: "shadow-emerald-500/25"
+            }
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              <Card className="p-8 bg-gradient-to-br from-slate-800/30 to-slate-900/30 border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300 group shadow-xl">
+                <motion.div 
+                  className={`p-4 bg-gradient-to-br ${feature.gradient} rounded-2xl w-fit mb-6 shadow-xl ${feature.shadowColor} group-hover:shadow-2xl transition-all duration-300`}
+                  whileHover={{ rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <feature.icon className="h-8 w-8 text-white" />
+                </motion.div>
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  {feature.description}
+                </p>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </div>
   );
