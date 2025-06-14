@@ -13,7 +13,22 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
-  const handleFileRead = (file: File) => {
+  const handlePDFRead = async (file: File) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await import('pdf-parse/lib/pdf-parse.js');
+      const data = await pdf.default(arrayBuffer);
+      onFileSelect(file, data.text);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to read the PDF file. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleTextFileRead = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
@@ -32,25 +47,27 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 10 * 1024 * 1024) { // Increased to 10MB for PDFs
         toast({
           title: "File too large",
-          description: "Please select a file smaller than 5MB.",
+          description: "Please select a file smaller than 10MB.",
           variant: "destructive"
         });
         return;
       }
       
-      if (!file.type.includes('text') && !file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
+      if (file.type === 'application/pdf') {
+        handlePDFRead(file);
+      } else if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+        handleTextFileRead(file);
+      } else {
         toast({
           title: "Unsupported file type",
-          description: "Please upload a text document (.txt, .md, or other text files).",
+          description: "Please upload a PDF, text document (.txt, .md, or other text files).",
           variant: "destructive"
         });
         return;
       }
-      
-      handleFileRead(file);
     }
   };
 
@@ -60,15 +77,26 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
     
     const file = e.dataTransfer.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 10 * 1024 * 1024) {
         toast({
           title: "File too large",
-          description: "Please select a file smaller than 5MB.",
+          description: "Please select a file smaller than 10MB.",
           variant: "destructive"
         });
         return;
       }
-      handleFileRead(file);
+      
+      if (file.type === 'application/pdf') {
+        handlePDFRead(file);
+      } else if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+        handleTextFileRead(file);
+      } else {
+        toast({
+          title: "Unsupported file type",
+          description: "Please upload a PDF, text document (.txt, .md, or other text files).",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -87,7 +115,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
       <input
         type="file"
         onChange={handleFileChange}
-        accept=".txt,.md,.doc,.docx,text/*"
+        accept=".txt,.md,.pdf,text/*,application/pdf"
         className="hidden"
         id="document-upload"
         disabled={disabled}
@@ -118,7 +146,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-dashed border-cyan-400 rounded-3xl p-12 text-center">
             <Upload className="h-16 w-16 text-cyan-400 mx-auto mb-4" />
             <p className="text-xl font-semibold text-white mb-2">Drop your document here</p>
-            <p className="text-slate-400">We'll review it with AI assistance</p>
+            <p className="text-slate-400">We'll review PDF and text files with AI assistance</p>
           </div>
         </div>
       )}
