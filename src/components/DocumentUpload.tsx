@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Upload, FileText, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,32 +55,52 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
       const arrayBuffer = await file.arrayBuffer();
       console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
       
-      // Import pdfjs-dist for browser compatibility
+      // Import pdfjs-dist
       const pdfjsLib = await import('pdfjs-dist');
       
-      // Set up the worker with correct version
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js`;
+      // Use a more reliable worker setup - inline worker as fallback
+      try {
+        // Try to use the bundled worker first
+        const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.js');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+      } catch (workerError) {
+        console.log('Bundled worker failed, using inline worker');
+        // Fallback to inline worker if CDN fails
+        pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(
+          new Blob([`
+            importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
+          `], { type: 'application/javascript' })
+        );
+      }
       
-      console.log('PDF.js imported successfully');
+      console.log('PDF.js worker configured successfully');
       
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await pdfjsLib.getDocument({ 
+        data: arrayBuffer,
+        verbosity: 0 // Reduce console noise
+      }).promise;
       console.log('PDF loaded, pages:', pdf.numPages);
       
       let fullText = '';
       
       // Extract text from all pages with progress
       for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .filter((item: any) => item.str)
-          .map((item: any) => item.str)
-          .join(' ');
-        fullText += pageText + '\n';
-        
-        // Show progress for large PDFs
-        if (pdf.numPages > 5) {
-          console.log(`Processing page ${i} of ${pdf.numPages}`);
+        try {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .filter((item: any) => item.str && item.str.trim())
+            .map((item: any) => item.str)
+            .join(' ');
+          fullText += pageText + '\n';
+          
+          // Show progress for large PDFs
+          if (pdf.numPages > 5) {
+            console.log(`Processing page ${i} of ${pdf.numPages}`);
+          }
+        } catch (pageError) {
+          console.warn(`Failed to process page ${i}:`, pageError);
+          // Continue with other pages
         }
       }
       
@@ -96,7 +115,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
         return;
       }
       
-      const wordCount = fullText.trim().split(/\s+/).length;
+      const wordCount = fullText.trim().split(/\s+/).filter(word => word.length > 0).length;
       const documentType = detectDocumentType(fullText, file.name);
       
       const metadata: DocumentMetadata = {
