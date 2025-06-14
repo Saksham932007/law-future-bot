@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Send, Scale, Sparkles, MessageCircle, Zap, Shield, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -206,64 +205,6 @@ const Index = () => {
               ⚖️ AI-powered legal guidance • For informational purposes only
             </p>
           </div>
-        </motion.div>
-      </div>
-
-      {/* Enhanced Features Section */}
-      <div className="container mx-auto px-4 py-16">
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          {[
-            {
-              icon: MessageCircle,
-              title: "Legal Q&A",
-              description: "Get instant answers to your legal questions with AI-powered analysis and comprehensive guidance.",
-              gradient: "from-cyan-500 to-blue-600",
-              shadowColor: "shadow-cyan-500/25"
-            },
-            {
-              icon: Shield,
-              title: "Legal Analysis",
-              description: "Receive detailed legal analysis and guidance on various legal matters and scenarios.",
-              gradient: "from-purple-500 to-pink-600",
-              shadowColor: "shadow-purple-500/25"
-            },
-            {
-              icon: Brain,
-              title: "Legal Research",
-              description: "Research legal precedents and case law with advanced AI assistance and detailed analysis.",
-              gradient: "from-emerald-500 to-teal-600",
-              shadowColor: "shadow-emerald-500/25"
-            }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-            >
-              <Card className="p-8 bg-gradient-to-br from-slate-800/30 to-slate-900/30 border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/50 transition-all duration-300 group shadow-xl">
-                <motion.div 
-                  className={`p-4 bg-gradient-to-br ${feature.gradient} rounded-2xl w-fit mb-6 shadow-xl ${feature.shadowColor} group-hover:shadow-2xl transition-all duration-300`}
-                  whileHover={{ rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <feature.icon className="h-8 w-8 text-white" />
-                </motion.div>
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </Card>
-            </motion.div>
-          ))}
         </motion.div>
       </div>
     </div>
