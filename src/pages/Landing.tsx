@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -129,9 +130,9 @@ const Landing = () => {
               </motion.div>
             </motion.div>
 
-            {/* Features Grid */}
+            {/* Features Grid - Updated Style */}
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.4 }}
@@ -141,25 +142,19 @@ const Landing = () => {
                   icon: MessageCircle,
                   title: "Legal Q&A",
                   description: "Get instant answers to your legal questions with AI-powered analysis and comprehensive research.",
-                  gradient: "from-cyan-500 to-blue-600",
-                  shadowColor: "shadow-cyan-500/25",
-                  glowColor: "from-cyan-500/20 to-blue-600/20"
+                  accent: "cyan"
                 },
                 {
                   icon: Shield,
                   title: "Legal Research",
                   description: "Research legal precedents and case law with advanced AI assistance and detailed insights.",
-                  gradient: "from-purple-500 to-pink-600",
-                  shadowColor: "shadow-purple-500/25",
-                  glowColor: "from-purple-500/20 to-pink-600/20"
+                  accent: "purple"
                 },
                 {
                   icon: Brain,
                   title: "Document Review",
                   description: "Get AI-powered insights on contracts and legal documents with thorough analysis.",
-                  gradient: "from-emerald-500 to-teal-600",
-                  shadowColor: "shadow-emerald-500/25",
-                  glowColor: "from-emerald-500/20 to-teal-600/20"
+                  accent: "emerald"
                 }
               ].map((feature, index) => (
                 <motion.div
@@ -167,31 +162,39 @@ const Landing = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1.6 + index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -8 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
                   className="relative group"
                 >
-                  <Card className="relative p-10 bg-gradient-to-br from-slate-800/40 to-slate-900/60 border border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/60 transition-all duration-500 group shadow-2xl h-full overflow-hidden rounded-3xl">
-                    {/* Animated background glow */}
-                    <div className={`absolute -inset-2 bg-gradient-to-r ${feature.glowColor} rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                  <div className="relative h-full p-8 bg-slate-800/20 backdrop-blur-sm border border-slate-700/30 rounded-2xl transition-all duration-300 group-hover:bg-slate-800/40 group-hover:border-slate-600/50">
+                    {/* Top accent line */}
+                    <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+                      feature.accent === 'cyan' ? 'from-cyan-400 to-blue-500' :
+                      feature.accent === 'purple' ? 'from-purple-400 to-pink-500' :
+                      'from-emerald-400 to-teal-500'
+                    } rounded-t-2xl`}></div>
                     
-                    <div className="relative z-10">
-                      <motion.div 
-                        className={`p-5 bg-gradient-to-br ${feature.gradient} rounded-3xl w-fit mx-auto mb-8 shadow-2xl ${feature.shadowColor} group-hover:shadow-2xl transition-all duration-500`}
-                        whileHover={{ rotate: 10, scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                      >
-                        <feature.icon className="h-10 w-10 text-white" />
-                      </motion.div>
-                      
-                      <h3 className="text-2xl font-bold text-white mb-6 group-hover:text-cyan-400 transition-colors duration-300 text-center">
-                        {feature.title}
-                      </h3>
-                      
-                      <p className="text-slate-400 text-base leading-relaxed text-center group-hover:text-slate-300 transition-colors duration-300">
-                        {feature.description}
-                      </p>
+                    {/* Icon */}
+                    <div className={`inline-flex p-4 rounded-xl mb-6 ${
+                      feature.accent === 'cyan' ? 'bg-cyan-500/10 text-cyan-400' :
+                      feature.accent === 'purple' ? 'bg-purple-500/10 text-purple-400' :
+                      'bg-emerald-500/10 text-emerald-400'
+                    } group-hover:scale-110 transition-transform duration-300`}>
+                      <feature.icon className="h-8 w-8" />
                     </div>
-                  </Card>
+                    
+                    {/* Content */}
+                    <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-cyan-300 transition-colors duration-300">
+                      {feature.title}
+                    </h3>
+                    <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors duration-300">
+                      {feature.description}
+                    </p>
+                    
+                    {/* Hover arrow */}
+                    <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <ArrowRight className="h-5 w-5 text-cyan-400" />
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
