@@ -17,6 +17,9 @@ interface Message {
   timestamp: Date;
 }
 
+// Embedded API key
+const GEMINI_API_KEY = 'AIzaSyAYYBn61_8r8tnVYUTqVxKvcy7PYQa5Jow';
+
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -28,21 +31,11 @@ const Index = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
-    if (!apiKey) {
-      toast({
-        title: "API Key Required",
-        description: "Please enter your Google AI Studio API key to continue.",
-        variant: "destructive"
-      });
-      return;
-    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -57,7 +50,7 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +90,7 @@ const Index = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to get AI response. Please check your API key and try again.",
+        description: "Failed to get AI response. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -158,103 +151,60 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Enhanced API Key Input */}
-      {!apiKey && (
-        <div className="container mx-auto px-4 py-12">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="max-w-md mx-auto p-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50 backdrop-blur-xl shadow-2xl">
-              <div className="text-center mb-6">
-                <motion.div 
-                  className="p-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl w-fit mx-auto mb-4 shadow-xl shadow-cyan-500/25"
-                  whileHover={{ scale: 1.05, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <MessageCircle className="h-8 w-8 text-white" />
-                </motion.div>
-                <h3 className="text-xl font-bold text-white mb-3 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  Google AI Studio API Key Required
-                </h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Enter your Google AI Studio API key to start chatting with Gemini, your AI legal assistant.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <Input
-                  type="password"
-                  placeholder="Enter your Google AI Studio API key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="bg-slate-900/50 border-slate-600 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400/20 h-12 rounded-xl"
-                />
-                <p className="text-xs text-slate-500 text-center">
-                  🔒 Your API key is stored locally and never sent to our servers.
-                </p>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
-      )}
-
       {/* Enhanced Chat Interface */}
-      {apiKey && (
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <motion.div 
-            className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-xl rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Messages */}
-            <div className="h-[600px] overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
-              {messages.map((message, index) => (
-                <ChatMessage 
-                  key={message.id} 
-                  message={message} 
-                  isLatest={index === messages.length - 1}
-                />
-              ))}
-              {isLoading && <LoadingMessage />}
-            </div>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <motion.div 
+          className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-xl rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Messages */}
+          <div className="h-[600px] overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
+            {messages.map((message, index) => (
+              <ChatMessage 
+                key={message.id} 
+                message={message} 
+                isLatest={index === messages.length - 1}
+              />
+            ))}
+            {isLoading && <LoadingMessage />}
+          </div>
 
-            {/* Enhanced Input Form */}
-            <div className="border-t border-slate-700/50 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm p-6">
-              <form onSubmit={handleSubmit} className="flex items-center space-x-4">
-                <div className="flex-1 relative">
-                  <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask me any legal question..."
-                    disabled={isLoading}
-                    className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
-                  />
-                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <Scale className="h-5 w-5 text-slate-500" />
-                  </div>
+          {/* Enhanced Input Form */}
+          <div className="border-t border-slate-700/50 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm p-6">
+            <form onSubmit={handleSubmit} className="flex items-center space-x-4">
+              <div className="flex-1 relative">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask me any legal question..."
+                  disabled={isLoading}
+                  className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
+                />
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <Scale className="h-5 w-5 text-slate-500" />
                 </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+              </div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button
+                  type="submit"
+                  disabled={isLoading || !input.trim()}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 h-14 px-8 rounded-2xl font-medium"
                 >
-                  <Button
-                    type="submit"
-                    disabled={isLoading || !input.trim()}
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 h-14 px-8 rounded-2xl font-medium"
-                  >
-                    <Send className="h-5 w-5" />
-                  </Button>
-                </motion.div>
-              </form>
-              <p className="text-xs text-slate-500 mt-3 text-center">
-                ⚖️ Responses are for informational purposes only and not a substitute for professional legal advice.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      )}
+                  <Send className="h-5 w-5" />
+                </Button>
+              </motion.div>
+            </form>
+            <p className="text-xs text-slate-500 mt-3 text-center">
+              ⚖️ Responses are for informational purposes only and not a substitute for professional legal advice.
+            </p>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Enhanced Features Section */}
       <div className="container mx-auto px-4 py-16">
