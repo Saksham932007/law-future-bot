@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -130,9 +129,9 @@ const Landing = () => {
               </motion.div>
             </motion.div>
 
-            {/* Features Grid - Updated Style */}
+            {/* Features Grid - Updated to remove Document Review */}
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.4 }}
@@ -149,12 +148,6 @@ const Landing = () => {
                   title: "Legal Research",
                   description: "Research legal precedents and case law with advanced AI assistance and detailed insights.",
                   accent: "purple"
-                },
-                {
-                  icon: Brain,
-                  title: "Document Review",
-                  description: "Get AI-powered insights on contracts and legal documents with thorough analysis.",
-                  accent: "emerald"
                 }
               ].map((feature, index) => (
                 <motion.div
@@ -169,15 +162,13 @@ const Landing = () => {
                     {/* Top accent line */}
                     <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
                       feature.accent === 'cyan' ? 'from-cyan-400 to-blue-500' :
-                      feature.accent === 'purple' ? 'from-purple-400 to-pink-500' :
-                      'from-emerald-400 to-teal-500'
+                      'from-purple-400 to-pink-500'
                     } rounded-t-2xl`}></div>
                     
                     {/* Icon */}
                     <div className={`inline-flex p-4 rounded-xl mb-6 ${
                       feature.accent === 'cyan' ? 'bg-cyan-500/10 text-cyan-400' :
-                      feature.accent === 'purple' ? 'bg-purple-500/10 text-purple-400' :
-                      'bg-emerald-500/10 text-emerald-400'
+                      'bg-purple-500/10 text-purple-400'
                     } group-hover:scale-110 transition-transform duration-300`}>
                       <feature.icon className="h-8 w-8" />
                     </div>
