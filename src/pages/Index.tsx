@@ -102,31 +102,32 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
-      {/* Enhanced Header with 3D Background */}
-      <div className="relative border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10"></div>
+      {/* Enhanced Header */}
+      <div className="relative border-b border-slate-700/30 bg-slate-900/20 backdrop-blur-xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5"></div>
         <Hero3D />
-        <div className="relative container mx-auto px-4 py-6">
+        <div className="relative container mx-auto px-6 py-4">
           <motion.div 
             className="flex items-center justify-between"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
           >
             <div className="flex items-center space-x-4">
               <motion.div 
-                className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-2xl shadow-cyan-500/25"
+                className="relative p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-2xl shadow-cyan-500/20"
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <Scale className="h-8 w-8 text-white" />
+                <Scale className="h-7 w-7 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/30 to-blue-500/30 rounded-2xl blur-sm"></div>
               </motion.div>
               <div>
                 <motion.h1 
-                  className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
+                  className="text-2xl font-bold bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
                 >
                   LegalAI Assistant
                 </motion.h1>
@@ -134,77 +135,107 @@ const Index = () => {
                   className="text-sm text-slate-400 font-medium"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
                 >
                   Smart Legal Analysis
                 </motion.p>
               </div>
             </div>
             <motion.div 
-              className="flex items-center space-x-3"
+              className="flex items-center space-x-3 bg-slate-800/30 px-4 py-2 rounded-full border border-slate-600/30"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
+              <div className="relative">
+                <Sparkles className="h-5 w-5 text-cyan-400" />
+                <div className="absolute inset-0 animate-ping">
+                  <Sparkles className="h-5 w-5 text-cyan-400/50" />
+                </div>
+              </div>
               <span className="text-sm text-slate-300 font-medium">AI Legal Assistant</span>
             </motion.div>
           </motion.div>
         </div>
       </div>
 
-      {/* Enhanced Chat Interface */}
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Main Chat Interface */}
+      <div className="container mx-auto px-6 py-6 max-w-5xl">
         <motion.div 
-          className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-xl rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
+          className="bg-gradient-to-br from-slate-800/20 to-slate-900/20 backdrop-blur-2xl rounded-3xl border border-slate-700/30 shadow-2xl overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
         >
-          {/* Messages */}
-          <div className="h-[600px] overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
-            {messages.map((message, index) => (
-              <ChatMessage 
-                key={message.id} 
-                message={message} 
-                isLatest={index === messages.length - 1}
-              />
-            ))}
-            {isLoading && <LoadingMessage />}
+          {/* Messages Container */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-800/10 via-transparent to-slate-900/10 pointer-events-none"></div>
+            <div className="h-[600px] overflow-y-auto p-8 space-y-8 scrollbar-thin scrollbar-thumb-slate-600/50 scrollbar-track-transparent hover:scrollbar-thumb-slate-500/70 transition-colors">
+              {messages.map((message, index) => (
+                <ChatMessage 
+                  key={message.id} 
+                  message={message} 
+                  isLatest={index === messages.length - 1}
+                />
+              ))}
+              {isLoading && <LoadingMessage />}
+            </div>
           </div>
 
-          {/* Enhanced Input Form */}
-          <div className="border-t border-slate-700/50 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm p-6">
-            <form onSubmit={handleSubmit} className="flex items-center space-x-4">
-              <div className="flex-1 relative">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask me any legal question..."
-                  disabled={isLoading}
-                  className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
-                />
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <Scale className="h-5 w-5 text-slate-500" />
+          {/* Enhanced Input Section */}
+          <div className="relative border-t border-slate-700/30 bg-gradient-to-r from-slate-900/30 to-slate-800/30 backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5"></div>
+            <div className="relative p-6">
+              <form onSubmit={handleSubmit} className="flex items-end space-x-4">
+                <div className="flex-1 relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Ask me any legal question..."
+                      disabled={isLoading}
+                      className="bg-slate-800/60 border-slate-600/50 text-white placeholder-slate-400 focus:border-cyan-400/70 focus:ring-cyan-400/20 pr-12 h-16 rounded-2xl text-base font-medium shadow-xl backdrop-blur-sm transition-all duration-300 focus:bg-slate-800/80 focus:shadow-cyan-500/10"
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                      <Scale className="h-5 w-5 text-slate-500 group-hover:text-cyan-400 transition-colors duration-300" />
+                    </div>
+                  </div>
+                </div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    type="submit"
+                    disabled={isLoading || !input.trim()}
+                    className="relative bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 hover:shadow-lg h-16 px-8 rounded-2xl font-semibold group overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    <Send className="h-5 w-5 relative z-10" />
+                  </Button>
+                </motion.div>
+              </form>
+              
+              {/* Enhanced Footer */}
+              <div className="flex items-center justify-center mt-4 space-x-4">
+                <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                  <Shield className="h-4 w-4" />
+                  <span>Secure & Confidential</span>
+                </div>
+                <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+                <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                  <Brain className="h-4 w-4" />
+                  <span>AI-Powered Legal Guidance</span>
+                </div>
+                <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+                <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                  <Zap className="h-4 w-4" />
+                  <span>For Informational Purposes Only</span>
                 </div>
               </div>
-              
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  type="submit"
-                  disabled={isLoading || !input.trim()}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 h-14 px-8 rounded-2xl font-medium"
-                >
-                  <Send className="h-5 w-5" />
-                </Button>
-              </motion.div>
-            </form>
-            <p className="text-xs text-slate-500 mt-3 text-center">
-              ⚖️ AI-powered legal guidance • For informational purposes only
-            </p>
+            </div>
           </div>
         </motion.div>
       </div>
