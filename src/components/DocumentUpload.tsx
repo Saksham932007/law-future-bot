@@ -58,20 +58,8 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
       // Import pdfjs-dist
       const pdfjsLib = await import('pdfjs-dist');
       
-      // Use a more reliable worker setup - inline worker as fallback
-      try {
-        // Try to use the bundled worker first
-        const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.js');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
-      } catch (workerError) {
-        console.log('Bundled worker failed, using inline worker');
-        // Fallback to inline worker if CDN fails
-        pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(
-          new Blob([`
-            importScripts('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
-          `], { type: 'application/javascript' })
-        );
-      }
+      // Use CDN worker that matches our pdfjs-dist version
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js';
       
       console.log('PDF.js worker configured successfully');
       
