@@ -1,19 +1,57 @@
+
 import { useState } from 'react';
 import { Upload, FileText, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 interface DocumentUploadProps {
-  onFileSelect: (file: File, content: string) => void;
+  onFileSelect: (file: File, content: string, metadata?: DocumentMetadata) => void;
   disabled?: boolean;
+}
+
+interface DocumentMetadata {
+  pageCount?: number;
+  fileType: string;
+  wordCount: number;
+  documentType: string;
 }
 
 export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+
+  const detectDocumentType = (content: string, fileName: string): string => {
+    const lowerContent = content.toLowerCase();
+    const lowerFileName = fileName.toLowerCase();
+    
+    if (lowerContent.includes('agreement') || lowerContent.includes('contract') || 
+        lowerFileName.includes('contract') || lowerFileName.includes('agreement')) {
+      return 'contract';
+    }
+    if (lowerContent.includes('policy') || lowerFileName.includes('policy')) {
+      return 'policy';
+    }
+    if (lowerContent.includes('lease') || lowerFileName.includes('lease')) {
+      return 'lease';
+    }
+    if (lowerContent.includes('nda') || lowerContent.includes('non-disclosure') ||
+        lowerFileName.includes('nda')) {
+      return 'nda';
+    }
+    if (lowerContent.includes('terms of service') || lowerContent.includes('terms and conditions')) {
+      return 'terms';
+    }
+    if (lowerContent.includes('whereas') && lowerContent.includes('party')) {
+      return 'legal-document';
+    }
+    
+    return 'general';
+  };
 
   const handlePDFRead = async (file: File) => {
     try {
+      setIsProcessing(true);
       console.log('Starting PDF read for file:', file.name);
       const arrayBuffer = await file.arrayBuffer();
       console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
@@ -21,8 +59,8 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
       // Import pdfjs-dist for browser compatibility
       const pdfjsLib = await import('pdfjs-dist');
       
-      // Set up the worker
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+      // Set up the worker with correct version
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js`;
       
       console.log('PDF.js imported successfully');
       
@@ -31,7 +69,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
       
       let fullText = '';
       
-      // Extract text from all pages
+      // Extract text from all pages with progress
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
@@ -40,6 +78,11 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
           .map((item: any) => item.str)
           .join(' ');
         fullText += pageText + '\n';
+        
+        // Show progress for large PDFs
+        if (pdf.numPages > 5) {
+          console.log(`Processing page ${i} of ${pdf.numPages}`);
+        }
       }
       
       console.log('PDF parsed successfully, text length:', fullText.length);
@@ -53,7 +96,22 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
         return;
       }
       
-      onFileSelect(file, fullText.trim());
+      const wordCount = fullText.trim().split(/\s+/).length;
+      const documentType = detectDocumentType(fullText, file.name);
+      
+      const metadata: DocumentMetadata = {
+        pageCount: pdf.numPages,
+        fileType: 'pdf',
+        wordCount,
+        documentType
+      };
+      
+      onFileSelect(file, fullText.trim(), metadata);
+      
+      toast({
+        title: "PDF processed successfully",
+        description: `Extracted text from ${pdf.numPages} pages (${wordCount} words). Document type: ${documentType}`,
+      });
     } catch (error) {
       console.error('PDF parsing error:', error);
       toast({
@@ -61,14 +119,27 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
         description: "Failed to read the PDF file. Please try a different PDF or convert it to text format.",
         variant: "destructive"
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleTextFileRead = (file: File) => {
+    setIsProcessing(true);
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      onFileSelect(file, content);
+      const wordCount = content.trim().split(/\s+/).length;
+      const documentType = detectDocumentType(content, file.name);
+      
+      const metadata: DocumentMetadata = {
+        fileType: 'text',
+        wordCount,
+        documentType
+      };
+      
+      onFileSelect(file, content, metadata);
+      setIsProcessing(false);
     };
     reader.onerror = () => {
       toast({
@@ -76,6 +147,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
         description: "Failed to read the file. Please try again.",
         variant: "destructive"
       });
+      setIsProcessing(false);
     };
     reader.readAsText(file);
   };
@@ -83,7 +155,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // Increased to 10MB for PDFs
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
         toast({
           title: "File too large",
           description: "Please select a file smaller than 10MB.",
@@ -154,19 +226,19 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
         accept=".txt,.md,.pdf,text/*,application/pdf"
         className="hidden"
         id="document-upload"
-        disabled={disabled}
+        disabled={disabled || isProcessing}
       />
       <label htmlFor="document-upload">
         <Button
           type="button"
           variant="outline"
-          disabled={disabled}
+          disabled={disabled || isProcessing}
           className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all duration-300 h-14 px-6 rounded-2xl font-medium"
           asChild
         >
           <div className="cursor-pointer">
             <Upload className="h-5 w-5 mr-2" />
-            Upload Document
+            {isProcessing ? 'Processing...' : 'Upload Document'}
           </div>
         </Button>
       </label>
@@ -182,7 +254,17 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-dashed border-cyan-400 rounded-3xl p-12 text-center">
             <Upload className="h-16 w-16 text-cyan-400 mx-auto mb-4" />
             <p className="text-xl font-semibold text-white mb-2">Drop your document here</p>
-            <p className="text-slate-400">We'll review PDF and text files with AI assistance</p>
+            <p className="text-slate-400">We'll analyze PDF and text files with AI assistance</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Processing Indicator */}
+      {isProcessing && (
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+          <div className="bg-slate-800 rounded-xl p-4 flex items-center space-x-3">
+            <div className="animate-spin h-5 w-5 border-2 border-cyan-400 border-t-transparent rounded-full"></div>
+            <span className="text-white text-sm">Processing document...</span>
           </div>
         </div>
       )}

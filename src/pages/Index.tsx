@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Send, Scale, Sparkles, MessageCircle, Zap, Shield, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,10 +20,18 @@ interface Message {
   documentName?: string;
 }
 
+interface DocumentMetadata {
+  pageCount?: number;
+  fileType: string;
+  wordCount: number;
+  documentType: string;
+}
+
 interface UploadedFile {
   name: string;
   size: number;
   content: string;
+  metadata?: DocumentMetadata;
 }
 
 // Embedded API key
@@ -44,15 +51,91 @@ const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
 
-  const handleFileSelect = (file: File, content: string) => {
+  const generateDocumentPrompt = (file: UploadedFile, userInput?: string) => {
+    const { metadata } = file;
+    let prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice.
+
+The user has uploaded a document named "${file.name}" with the following details:
+- Document type: ${metadata?.documentType || 'general'}
+- Word count: ${metadata?.wordCount || 'unknown'}
+- File type: ${metadata?.fileType || 'unknown'}`;
+
+    if (metadata?.pageCount) {
+      prompt += `\n- Page count: ${metadata.pageCount}`;
+    }
+
+    prompt += `\n\nDocument content:\n${file.content}\n\n`;
+
+    // Tailor analysis based on document type
+    switch (metadata?.documentType) {
+      case 'contract':
+        prompt += `Please provide a comprehensive contract analysis including:
+1. Key terms and obligations for each party
+2. Payment terms and deadlines
+3. Termination clauses and conditions
+4. Potential legal risks or red flags
+5. Recommendations for improvement or clarification
+6. Compliance considerations`;
+        break;
+      case 'lease':
+        prompt += `Please provide a lease agreement analysis including:
+1. Lease terms, duration, and renewal options
+2. Rent amount, escalation clauses, and payment terms
+3. Tenant and landlord responsibilities
+4. Security deposit and fee structures
+5. Maintenance and repair obligations
+6. Termination and eviction procedures
+7. Legal compliance and tenant rights`;
+        break;
+      case 'nda':
+        prompt += `Please provide an NDA analysis including:
+1. Scope of confidential information covered
+2. Duration of confidentiality obligations
+3. Permitted disclosures and exceptions
+4. Consequences of breach
+5. Jurisdiction and governing law
+6. Recommendations for strengthening protection`;
+        break;
+      case 'policy':
+        prompt += `Please provide a policy document analysis including:
+1. Policy scope and applicability
+2. Key requirements and procedures
+3. Compliance obligations
+4. Enforcement mechanisms
+5. Legal adequacy and potential gaps
+6. Recommendations for improvement`;
+        break;
+      default:
+        prompt += `Please provide a comprehensive legal document analysis including:
+1. Document purpose and legal significance
+2. Key legal provisions and requirements
+3. Rights and obligations identified
+4. Potential legal issues or concerns
+5. Compliance considerations
+6. Recommendations and next steps`;
+    }
+
+    if (userInput && userInput.trim()) {
+      prompt += `\n\nSpecific user question: ${userInput}`;
+    } else {
+      prompt += `\n\nPlease provide the analysis above and highlight any critical issues that require immediate attention.`;
+    }
+
+    return prompt;
+  };
+
+  const handleFileSelect = (file: File, content: string, metadata?: DocumentMetadata) => {
     setUploadedFile({
       name: file.name,
       size: file.size,
-      content: content
+      content: content,
+      metadata
     });
+    
+    const typeDescription = metadata?.documentType ? ` (${metadata.documentType})` : '';
     toast({
       title: "Document uploaded",
-      description: `${file.name} is ready for review.`
+      description: `${file.name}${typeDescription} is ready for analysis.`
     });
   };
 
@@ -74,7 +157,7 @@ const Index = () => {
       if (input.trim()) {
         messageContent = `${input}\n\n[Document attached: ${uploadedFile.name}]`;
       } else {
-        messageContent = `Please review this document: ${uploadedFile.name}`;
+        messageContent = `Please analyze this document: ${uploadedFile.name}`;
       }
     }
 
@@ -95,16 +178,12 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      let prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.`;
+      let prompt: string;
 
       if (currentFile) {
-        prompt += `\n\nThe user has uploaded a document named "${currentFile.name}". Please review and analyze this document:\n\n${currentFile.content}\n\n`;
-      }
-
-      if (currentInput.trim()) {
-        prompt += `\nUser: ${currentInput}`;
-      } else if (currentFile) {
-        prompt += `\nUser: Please review this document and provide a comprehensive legal analysis, including any potential issues, recommendations, and key points I should be aware of.`;
+        prompt = generateDocumentPrompt(currentFile, currentInput);
+      } else {
+        prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.\n\nUser: ${currentInput}`;
       }
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -191,7 +270,7 @@ const Index = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  Powered by Gemini AI
+                  Powered by Gemini AI • Enhanced Document Analysis
                 </motion.p>
               </div>
             </div>
@@ -202,7 +281,7 @@ const Index = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
-              <span className="text-sm text-slate-300 font-medium">AI-Powered Legal Guidance</span>
+              <span className="text-sm text-slate-300 font-medium">Smart Legal Analysis</span>
             </motion.div>
           </motion.div>
         </div>
@@ -235,7 +314,7 @@ const Index = () => {
               <UploadedDocument
                 fileName={uploadedFile.name}
                 fileSize={uploadedFile.size}
-                onRemove={handleRemoveFile}
+                onRemove={() => setUploadedFile(null)}
               />
             )}
             
@@ -244,7 +323,7 @@ const Index = () => {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask me any legal question or upload a document for review..."
+                  placeholder="Ask me any legal question or upload a document for comprehensive analysis..."
                   disabled={isLoading}
                   className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
                 />
@@ -272,7 +351,7 @@ const Index = () => {
               </motion.div>
             </form>
             <p className="text-xs text-slate-500 mt-3 text-center">
-              ⚖️ Responses are for informational purposes only and not a substitute for professional legal advice.
+              ⚖️ Enhanced with document type detection and specialized legal analysis • For informational purposes only
             </p>
           </div>
         </motion.div>
@@ -296,8 +375,8 @@ const Index = () => {
             },
             {
               icon: Shield,
-              title: "Document Review",
-              description: "Upload contracts, agreements, or legal documents for thorough AI-powered analysis and insights.",
+              title: "Smart Document Analysis",
+              description: "Upload contracts, agreements, or legal documents for AI-powered analysis with document type detection.",
               gradient: "from-purple-500 to-pink-600",
               shadowColor: "shadow-purple-500/25"
             },
