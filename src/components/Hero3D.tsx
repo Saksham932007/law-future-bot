@@ -1,6 +1,6 @@
 
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Float, Text3D, Center, useTexture } from '@react-three/drei';
+import { OrbitControls, Float, Center } from '@react-three/drei';
 import { useRef } from 'react';
 import { Mesh } from 'three';
 import { useFrame } from '@react-three/fiber';
