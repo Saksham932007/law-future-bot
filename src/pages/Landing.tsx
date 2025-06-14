@@ -171,7 +171,7 @@ const Landing = () => {
                   whileHover={{ scale: 1.05, y: -8 }}
                   className="relative group"
                 >
-                  <Card className="relative p-10 bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/60 transition-all duration-500 group shadow-2xl h-full overflow-hidden">
+                  <Card className="relative p-10 bg-gradient-to-br from-slate-800/40 to-slate-900/60 border border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/60 transition-all duration-500 group shadow-2xl h-full overflow-hidden rounded-3xl">
                     {/* Animated background glow */}
                     <div className={`absolute -inset-2 bg-gradient-to-r ${feature.glowColor} rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
                     
