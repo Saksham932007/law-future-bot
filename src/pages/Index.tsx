@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Send, Scale, Sparkles, MessageCircle, Zap, Shield, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Hero3D } from '@/components/Hero3D';
 import { ChatMessage } from '@/components/ChatMessage';
 import { LoadingMessage } from '@/components/LoadingMessage';
-import { DocumentUpload } from '@/components/DocumentUpload';
-import { UploadedDocument } from '@/components/UploadedDocument';
 import { motion } from 'framer-motion';
 
 interface Message {
@@ -16,22 +15,6 @@ interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
-  hasDocument?: boolean;
-  documentName?: string;
-}
-
-interface DocumentMetadata {
-  pageCount?: number;
-  fileType: string;
-  wordCount: number;
-  documentType: string;
-}
-
-interface UploadedFile {
-  name: string;
-  size: number;
-  content: string;
-  metadata?: DocumentMetadata;
 }
 
 // Embedded API key
@@ -41,150 +24,33 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your AI Legal Assistant powered by Gemini. I can help you with legal questions, document review, contract analysis, and general legal guidance. You can also upload documents for me to review and analyze. How can I assist you today?",
+      content: "Hello! I'm your AI Legal Assistant powered by Gemini. I can help you with legal questions, contract analysis, and general legal guidance. How can I assist you today?",
       role: 'assistant',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
-
-  const generateDocumentPrompt = (file: UploadedFile, userInput?: string) => {
-    const { metadata } = file;
-    let prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice.
-
-The user has uploaded a document named "${file.name}" with the following details:
-- Document type: ${metadata?.documentType || 'general'}
-- Word count: ${metadata?.wordCount || 'unknown'}
-- File type: ${metadata?.fileType || 'unknown'}`;
-
-    if (metadata?.pageCount) {
-      prompt += `\n- Page count: ${metadata.pageCount}`;
-    }
-
-    prompt += `\n\nDocument content:\n${file.content}\n\n`;
-
-    // Tailor analysis based on document type
-    switch (metadata?.documentType) {
-      case 'contract':
-        prompt += `Please provide a comprehensive contract analysis including:
-1. Key terms and obligations for each party
-2. Payment terms and deadlines
-3. Termination clauses and conditions
-4. Potential legal risks or red flags
-5. Recommendations for improvement or clarification
-6. Compliance considerations`;
-        break;
-      case 'lease':
-        prompt += `Please provide a lease agreement analysis including:
-1. Lease terms, duration, and renewal options
-2. Rent amount, escalation clauses, and payment terms
-3. Tenant and landlord responsibilities
-4. Security deposit and fee structures
-5. Maintenance and repair obligations
-6. Termination and eviction procedures
-7. Legal compliance and tenant rights`;
-        break;
-      case 'nda':
-        prompt += `Please provide an NDA analysis including:
-1. Scope of confidential information covered
-2. Duration of confidentiality obligations
-3. Permitted disclosures and exceptions
-4. Consequences of breach
-5. Jurisdiction and governing law
-6. Recommendations for strengthening protection`;
-        break;
-      case 'policy':
-        prompt += `Please provide a policy document analysis including:
-1. Policy scope and applicability
-2. Key requirements and procedures
-3. Compliance obligations
-4. Enforcement mechanisms
-5. Legal adequacy and potential gaps
-6. Recommendations for improvement`;
-        break;
-      default:
-        prompt += `Please provide a comprehensive legal document analysis including:
-1. Document purpose and legal significance
-2. Key legal provisions and requirements
-3. Rights and obligations identified
-4. Potential legal issues or concerns
-5. Compliance considerations
-6. Recommendations and next steps`;
-    }
-
-    if (userInput && userInput.trim()) {
-      prompt += `\n\nSpecific user question: ${userInput}`;
-    } else {
-      prompt += `\n\nPlease provide the analysis above and highlight any critical issues that require immediate attention.`;
-    }
-
-    return prompt;
-  };
-
-  const handleFileSelect = (file: File, content: string, metadata?: DocumentMetadata) => {
-    setUploadedFile({
-      name: file.name,
-      size: file.size,
-      content: content,
-      metadata
-    });
-    
-    const typeDescription = metadata?.documentType ? ` (${metadata.documentType})` : '';
-    toast({
-      title: "Document uploaded",
-      description: `${file.name}${typeDescription} is ready for analysis.`
-    });
-  };
-
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!input.trim() && !uploadedFile) || isLoading) return;
-
-    let messageContent = input;
-    let hasDocument = false;
-    let documentName = '';
-
-    if (uploadedFile) {
-      hasDocument = true;
-      documentName = uploadedFile.name;
-      if (input.trim()) {
-        messageContent = `${input}\n\n[Document attached: ${uploadedFile.name}]`;
-      } else {
-        messageContent = `Please analyze this document: ${uploadedFile.name}`;
-      }
-    }
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: messageContent,
+      content: input,
       role: 'user',
-      timestamp: new Date(),
-      hasDocument,
-      documentName
+      timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
     const currentInput = input;
-    const currentFile = uploadedFile;
     setInput('');
-    setUploadedFile(null);
     setIsLoading(true);
 
     try {
-      let prompt: string;
-
-      if (currentFile) {
-        prompt = generateDocumentPrompt(currentFile, currentInput);
-      } else {
-        prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.\n\nUser: ${currentInput}`;
-      }
+      const prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.\n\nUser: ${currentInput}`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
@@ -270,7 +136,7 @@ The user has uploaded a document named "${file.name}" with the following details
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  Powered by Gemini AI • Enhanced Document Analysis
+                  Powered by Gemini AI • Smart Legal Analysis
                 </motion.p>
               </div>
             </div>
@@ -309,21 +175,12 @@ The user has uploaded a document named "${file.name}" with the following details
 
           {/* Enhanced Input Form */}
           <div className="border-t border-slate-700/50 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm p-6">
-            {/* Uploaded Document Display */}
-            {uploadedFile && (
-              <UploadedDocument
-                fileName={uploadedFile.name}
-                fileSize={uploadedFile.size}
-                onRemove={() => setUploadedFile(null)}
-              />
-            )}
-            
             <form onSubmit={handleSubmit} className="flex items-center space-x-4">
               <div className="flex-1 relative">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask me any legal question or upload a document for comprehensive analysis..."
+                  placeholder="Ask me any legal question..."
                   disabled={isLoading}
                   className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
                 />
@@ -332,18 +189,13 @@ The user has uploaded a document named "${file.name}" with the following details
                 </div>
               </div>
               
-              <DocumentUpload
-                onFileSelect={handleFileSelect}
-                disabled={isLoading}
-              />
-              
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
                   type="submit"
-                  disabled={isLoading || (!input.trim() && !uploadedFile)}
+                  disabled={isLoading || !input.trim()}
                   className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 h-14 px-8 rounded-2xl font-medium"
                 >
                   <Send className="h-5 w-5" />
@@ -351,7 +203,7 @@ The user has uploaded a document named "${file.name}" with the following details
               </motion.div>
             </form>
             <p className="text-xs text-slate-500 mt-3 text-center">
-              ⚖️ Enhanced with document type detection and specialized legal analysis • For informational purposes only
+              ⚖️ AI-powered legal guidance • For informational purposes only
             </p>
           </div>
         </motion.div>
@@ -375,8 +227,8 @@ The user has uploaded a document named "${file.name}" with the following details
             },
             {
               icon: Shield,
-              title: "Smart Document Analysis",
-              description: "Upload contracts, agreements, or legal documents for AI-powered analysis with document type detection.",
+              title: "Legal Analysis",
+              description: "Receive detailed legal analysis and guidance on various legal matters and scenarios.",
               gradient: "from-purple-500 to-pink-600",
               shadowColor: "shadow-purple-500/25"
             },
