@@ -1,11 +1,9 @@
-
 import { useState } from 'react';
 import { Send, Scale, Sparkles, MessageCircle, Zap, Shield, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Hero3D } from '@/components/Hero3D';
 import { ChatMessage } from '@/components/ChatMessage';
 import { LoadingMessage } from '@/components/LoadingMessage';
 import { motion } from 'framer-motion';
@@ -105,7 +103,6 @@ const Index = () => {
       {/* Enhanced Header */}
       <div className="relative border-b border-slate-700/30 bg-slate-900/20 backdrop-blur-xl">
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5"></div>
-        <Hero3D />
         <div className="relative container mx-auto px-6 py-4">
           <motion.div 
             className="flex items-center justify-between"
