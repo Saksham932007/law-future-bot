@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Upload, FileText, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,14 +18,33 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
       const arrayBuffer = await file.arrayBuffer();
       console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
       
-      // Try to import pdf-parse with the correct path
-      const pdfParse = await import('pdf-parse');
-      console.log('pdf-parse imported successfully');
+      // Import pdfjs-dist for browser compatibility
+      const pdfjsLib = await import('pdfjs-dist');
       
-      const data = await pdfParse.default(arrayBuffer);
-      console.log('PDF parsed successfully, text length:', data.text.length);
+      // Set up the worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
       
-      if (!data.text || data.text.trim().length === 0) {
+      console.log('PDF.js imported successfully');
+      
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      console.log('PDF loaded, pages:', pdf.numPages);
+      
+      let fullText = '';
+      
+      // Extract text from all pages
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .filter((item: any) => item.str)
+          .map((item: any) => item.str)
+          .join(' ');
+        fullText += pageText + '\n';
+      }
+      
+      console.log('PDF parsed successfully, text length:', fullText.length);
+      
+      if (!fullText || fullText.trim().length === 0) {
         toast({
           title: "Warning",
           description: "PDF appears to be empty or contains only images. Please try a text-based PDF.",
@@ -35,7 +53,7 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
         return;
       }
       
-      onFileSelect(file, data.text);
+      onFileSelect(file, fullText.trim());
     } catch (error) {
       console.error('PDF parsing error:', error);
       toast({
