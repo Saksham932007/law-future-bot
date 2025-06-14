@@ -15,14 +15,32 @@ export const DocumentUpload = ({ onFileSelect, disabled }: DocumentUploadProps) 
 
   const handlePDFRead = async (file: File) => {
     try {
+      console.log('Starting PDF read for file:', file.name);
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await import('pdf-parse/lib/pdf-parse.js');
-      const data = await pdf.default(arrayBuffer);
+      console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
+      
+      // Try to import pdf-parse with the correct path
+      const pdfParse = await import('pdf-parse');
+      console.log('pdf-parse imported successfully');
+      
+      const data = await pdfParse.default(arrayBuffer);
+      console.log('PDF parsed successfully, text length:', data.text.length);
+      
+      if (!data.text || data.text.trim().length === 0) {
+        toast({
+          title: "Warning",
+          description: "PDF appears to be empty or contains only images. Please try a text-based PDF.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       onFileSelect(file, data.text);
     } catch (error) {
+      console.error('PDF parsing error:', error);
       toast({
         title: "Error",
-        description: "Failed to read the PDF file. Please try again.",
+        description: "Failed to read the PDF file. Please try a different PDF or convert it to text format.",
         variant: "destructive"
       });
     }
