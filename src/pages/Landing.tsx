@@ -18,14 +18,17 @@ const Landing = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden relative">
       {/* Animated Background Grid */}
       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px',
-          animation: 'grid-move 20s linear infinite'
-        }}></div>
+        <div 
+          className="absolute inset-0 animate-pulse"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            animation: 'gridMove 20s linear infinite'
+          }}
+        />
       </div>
 
       {/* Hero Section with 3D Background */}
@@ -244,8 +247,8 @@ const Landing = () => {
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes grid-move {
+      <style>{`
+        @keyframes gridMove {
           0% { transform: translate(0, 0); }
           100% { transform: translate(50px, 50px); }
         }
