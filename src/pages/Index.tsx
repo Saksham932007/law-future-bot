@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Send, Scale, Sparkles, MessageCircle, User, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your AI Legal Assistant. I can help you with legal questions, document review, contract analysis, and general legal guidance. How can I assist you today?",
+      content: "Hello! I'm your AI Legal Assistant powered by Claude. I can help you with legal questions, document review, contract analysis, and general legal guidance. How can I assist you today?",
       role: 'assistant',
       timestamp: new Date()
     }
@@ -34,7 +33,7 @@ const Index = () => {
     if (!apiKey) {
       toast({
         title: "API Key Required",
-        description: "Please enter your OpenAI API key to continue.",
+        description: "Please enter your Anthropic API key to continue.",
         variant: "destructive"
       });
       return;
@@ -48,34 +47,32 @@ const Index = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'x-api-key': apiKey,
           'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1000,
+          system: 'You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.',
           messages: [
-            {
-              role: 'system',
-              content: 'You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.'
-            },
             ...messages.map(msg => ({
               role: msg.role,
               content: msg.content
             })),
             {
               role: 'user',
-              content: input
+              content: currentInput
             }
-          ],
-          temperature: 0.7,
-          max_tokens: 1000,
+          ]
         }),
       });
 
@@ -86,7 +83,7 @@ const Index = () => {
       const data = await response.json();
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.choices[0].message.content,
+        content: data.content[0].text,
         role: 'assistant',
         timestamp: new Date()
       };
@@ -117,7 +114,7 @@ const Index = () => {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                   LegalAI Assistant
                 </h1>
-                <p className="text-sm text-slate-400">Powered by OpenAI</p>
+                <p className="text-sm text-slate-400">Powered by Claude</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -136,13 +133,13 @@ const Index = () => {
               <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full w-fit mx-auto mb-3">
                 <MessageCircle className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">OpenAI API Key Required</h3>
-              <p className="text-sm text-slate-400">Enter your OpenAI API key to start chatting with the AI legal assistant.</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Anthropic API Key Required</h3>
+              <p className="text-sm text-slate-400">Enter your Anthropic API key to start chatting with Claude, your AI legal assistant.</p>
             </div>
             <div className="space-y-3">
               <Input
                 type="password"
-                placeholder="Enter your OpenAI API key"
+                placeholder="Enter your Anthropic API key"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="bg-slate-900/50 border-slate-600 text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-cyan-400/20"
@@ -204,7 +201,7 @@ const Index = () => {
                           <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                           <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                        <span className="text-sm text-slate-400">AI is thinking...</span>
+                        <span className="text-sm text-slate-400">Claude is thinking...</span>
                       </div>
                     </div>
                   </div>
