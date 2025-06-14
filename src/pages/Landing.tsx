@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -96,7 +97,7 @@ const Landing = () => {
                 className="relative"
               >
                 <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-4xl mx-auto leading-relaxed font-light">
-                  Get instant legal guidance, document analysis, and professional insights powered by advanced AI technology. 
+                  Get instant legal guidance and professional insights powered by advanced AI technology. 
                   Your trusted companion for navigating complex legal matters.
                 </p>
                 <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 blur-xl rounded-full opacity-50"></div>
