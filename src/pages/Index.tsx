@@ -8,6 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Hero3D } from '@/components/Hero3D';
 import { ChatMessage } from '@/components/ChatMessage';
 import { LoadingMessage } from '@/components/LoadingMessage';
+import { DocumentUpload } from '@/components/DocumentUpload';
+import { UploadedDocument } from '@/components/UploadedDocument';
 import { motion } from 'framer-motion';
 
 interface Message {
@@ -15,6 +17,14 @@ interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
+  hasDocument?: boolean;
+  documentName?: string;
+}
+
+interface UploadedFile {
+  name: string;
+  size: number;
+  content: string;
 }
 
 // Embedded API key
@@ -24,32 +34,79 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your AI Legal Assistant powered by Gemini. I can help you with legal questions, document review, contract analysis, and general legal guidance. How can I assist you today?",
+      content: "Hello! I'm your AI Legal Assistant powered by Gemini. I can help you with legal questions, document review, contract analysis, and general legal guidance. You can also upload documents for me to review and analyze. How can I assist you today?",
       role: 'assistant',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const { toast } = useToast();
+
+  const handleFileSelect = (file: File, content: string) => {
+    setUploadedFile({
+      name: file.name,
+      size: file.size,
+      content: content
+    });
+    toast({
+      title: "Document uploaded",
+      description: `${file.name} is ready for review.`
+    });
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !uploadedFile) || isLoading) return;
+
+    let messageContent = input;
+    let hasDocument = false;
+    let documentName = '';
+
+    if (uploadedFile) {
+      hasDocument = true;
+      documentName = uploadedFile.name;
+      if (input.trim()) {
+        messageContent = `${input}\n\n[Document attached: ${uploadedFile.name}]`;
+      } else {
+        messageContent = `Please review this document: ${uploadedFile.name}`;
+      }
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: messageContent,
       role: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      hasDocument,
+      documentName
     };
 
     setMessages(prev => [...prev, userMessage]);
     const currentInput = input;
+    const currentFile = uploadedFile;
     setInput('');
+    setUploadedFile(null);
     setIsLoading(true);
 
     try {
+      let prompt = `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.`;
+
+      if (currentFile) {
+        prompt += `\n\nThe user has uploaded a document named "${currentFile.name}". Please review and analyze this document:\n\n${currentFile.content}\n\n`;
+      }
+
+      if (currentInput.trim()) {
+        prompt += `\nUser: ${currentInput}`;
+      } else if (currentFile) {
+        prompt += `\nUser: Please review this document and provide a comprehensive legal analysis, including any potential issues, recommendations, and key points I should be aware of.`;
+      }
+
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
@@ -60,7 +117,7 @@ const Index = () => {
             {
               parts: [
                 {
-                  text: `You are a professional AI legal assistant. Provide helpful, accurate legal information and guidance. Always remind users that your responses are for informational purposes only and not a substitute for professional legal advice. Be thorough, professional, and cite relevant legal principles when appropriate.\n\nUser: ${currentInput}`
+                  text: prompt
                 }
               ]
             }
@@ -69,7 +126,7 @@ const Index = () => {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 1000,
+            maxOutputTokens: 2000,
           }
         }),
       });
@@ -173,12 +230,21 @@ const Index = () => {
 
           {/* Enhanced Input Form */}
           <div className="border-t border-slate-700/50 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm p-6">
+            {/* Uploaded Document Display */}
+            {uploadedFile && (
+              <UploadedDocument
+                fileName={uploadedFile.name}
+                fileSize={uploadedFile.size}
+                onRemove={handleRemoveFile}
+              />
+            )}
+            
             <form onSubmit={handleSubmit} className="flex items-center space-x-4">
               <div className="flex-1 relative">
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask me any legal question..."
+                  placeholder="Ask me any legal question or upload a document for review..."
                   disabled={isLoading}
                   className="bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 focus:border-cyan-400 focus:ring-cyan-400/20 pr-12 h-14 rounded-2xl text-base"
                 />
@@ -186,13 +252,19 @@ const Index = () => {
                   <Scale className="h-5 w-5 text-slate-500" />
                 </div>
               </div>
+              
+              <DocumentUpload
+                onFileSelect={handleFileSelect}
+                disabled={isLoading}
+              />
+              
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button
                   type="submit"
-                  disabled={isLoading || !input.trim()}
+                  disabled={isLoading || (!input.trim() && !uploadedFile)}
                   className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0 shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:shadow-cyan-500/40 h-14 px-8 rounded-2xl font-medium"
                 >
                   <Send className="h-5 w-5" />
@@ -224,15 +296,15 @@ const Index = () => {
             },
             {
               icon: Shield,
-              title: "Legal Research",
-              description: "Research legal precedents and case law with advanced AI assistance and detailed analysis.",
+              title: "Document Review",
+              description: "Upload contracts, agreements, or legal documents for thorough AI-powered analysis and insights.",
               gradient: "from-purple-500 to-pink-600",
               shadowColor: "shadow-purple-500/25"
             },
             {
               icon: Brain,
-              title: "Document Review",
-              description: "Get AI-powered insights on contracts and legal documents with thorough analysis.",
+              title: "Legal Research",
+              description: "Research legal precedents and case law with advanced AI assistance and detailed analysis.",
               gradient: "from-emerald-500 to-teal-600",
               shadowColor: "shadow-emerald-500/25"
             }

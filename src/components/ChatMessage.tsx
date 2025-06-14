@@ -1,5 +1,5 @@
 
-import { User, Bot } from 'lucide-react';
+import { User, Bot, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Message {
@@ -7,6 +7,8 @@ interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
+  hasDocument?: boolean;
+  documentName?: string;
 }
 
 interface ChatMessageProps {
@@ -48,6 +50,14 @@ export const ChatMessage = ({ message, isLatest }: ChatMessageProps) => {
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
+          {/* Document indicator */}
+          {message.hasDocument && message.documentName && (
+            <div className="flex items-center space-x-2 mb-3 p-2 bg-white/10 rounded-xl">
+              <FileText className="h-4 w-4 text-cyan-300" />
+              <span className="text-xs text-cyan-300 font-medium">{message.documentName}</span>
+            </div>
+          )}
+          
           <div className="prose prose-invert max-w-none">
             <p className="text-sm leading-relaxed whitespace-pre-wrap mb-0">{message.content}</p>
           </div>
